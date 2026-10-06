@@ -41,6 +41,7 @@ import triangle.abstractSyntaxTrees.commands.Command;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+import triangle.abstractSyntaxTrees.commands.RepeatCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
@@ -85,6 +86,7 @@ import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 import triangle.abstractSyntaxTrees.vnames.Vname;
+
 
 public class Parser {
 
@@ -334,6 +336,16 @@ public class Parser {
 			Command cAST = parseSingleCommand();
 			finish(commandPos);
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
+		}
+			break;
+
+		case REPEAT: {
+			acceptIt(); // consumes 'repeat'
+			Command cAST = parseCommand(); // parse loop body command
+			accept(Token.Kind.UNTIL); // consumes 'until'
+			Expression eAST = parseExpression(); // parse condition expression
+			finish(commandPos);
+			commandAST = new RepeatCommand(cAST, eAST, commandPos);
 		}
 			break;
 

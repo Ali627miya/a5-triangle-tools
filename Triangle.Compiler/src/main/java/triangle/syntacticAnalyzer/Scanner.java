@@ -39,7 +39,7 @@ public final class Scanner {
 
 	public static boolean isOperator(char c) {
 		return (c == '+' || c == '-' || c == '*' || c == '/' || c == '=' || c == '<' || c == '>' || c == '\\'
-				|| c == '&' || c == '@' || c == '%' || c == '^' || c == '?');
+				|| c == '&' || c == '@' || c == '%' || c == '^' || c == '?' || c == '|');
 	}
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -67,17 +67,27 @@ public final class Scanner {
 
 	private void scanSeparator() {
 		switch (currentChar) {
-		
+
 		// comment
-		case '!': 
+		case '!':
+		case '#':
 			takeIt();
-			
-			// the comment ends when we reach an end-of-line (EOL) or end of file (EOT - for end-of-transmission)
 			while ((currentChar != SourceFile.EOL) && (currentChar != SourceFile.EOT))
 				takeIt();
 			if (currentChar == SourceFile.EOL)
 				takeIt();
 			break;
+	
+			// multi-line comment: $ ... $
+		case '$':
+				takeIt(); // consume opening '$'
+				while ((currentChar != '$') && (currentChar != SourceFile.EOT)) {
+					// takeIt() naturally handles newline tracking in the source reader
+					takeIt();
+				}
+				if (currentChar == '$')
+					takeIt(); // consume closing '$'
+				break;
 
 		// whitespace
 		case ' ':
@@ -178,6 +188,7 @@ public final class Scanner {
 		case '%':
 		case '^':
 		case '?':
+		case '|':
 			takeIt();
 			while (isOperator(currentChar))
 				takeIt();
@@ -239,7 +250,7 @@ public final class Scanner {
 		case '}':
 			takeIt();
 			return Token.Kind.RCURLY;
-
+		
 		case SourceFile.EOT:
 			return Token.Kind.EOT;
 
@@ -257,7 +268,7 @@ public final class Scanner {
 		currentlyScanningToken = false;
 		// skip any whitespace or comments
 		while (currentChar == '!' || currentChar == ' ' || currentChar == '\n' || currentChar == '\r'
-				|| currentChar == '\t')
+				|| currentChar == '\t' || currentChar == '#' || currentChar == '$')
 			scanSeparator();
 
 		currentlyScanningToken = true;

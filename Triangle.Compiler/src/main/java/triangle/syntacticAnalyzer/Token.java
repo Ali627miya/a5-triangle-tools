@@ -55,7 +55,7 @@ final class Token {
 
 		// reserved words - keep in alphabetical order for ease of maintenance...
 		ARRAY("array"), BEGIN("begin"), CONST("const"), DO("do"), ELSE("else"), END("end"), FUNC("func"), IF("if"), IN("in"), LET("let"), OF("of"),
-		PROC("proc"), RECORD("record"), THEN("then"), TYPE("type"), VAR("var"), WHILE("while"),
+		PROC("proc"), RECORD("record"),REPEAT("repeat"), THEN("then"), TYPE("type"),UNTIL("until"), VAR("var"), WHILE("while"),
 
 		// punctuation...
 		DOT("."), COLON(":"), SEMICOLON(";"), COMMA(","), BECOMES(":="), IS("~"),
@@ -65,18 +65,18 @@ final class Token {
 
 		// special tokens...
 		EOT(""), ERROR("<error>");
-		
+
 	    public final String spelling;
-		
+
 	    private Kind(String spelling) {
 	        this.spelling = spelling;
 	    }
-	    
+
 	    /**
 	     * iterate over the reserved words above to find the one with a given spelling
 	     * need to specify firstReservedWord and lastReservedWord (inclusive) for this
 	     * to work!
-	     * 
+	     *
 	     * @return Kind.IDENTIFIER if no matching token class found
 	     */
 	    public static Kind fromSpelling(String spelling) {
@@ -85,11 +85,11 @@ final class Token {
 	    		if (kind == firstReservedWord) {
 	    			isRW = true;
 	    		}
-	    		
+
 	    		if (isRW && kind.spelling.equals(spelling)) {
 	    			return kind;
 	    		}
-	    		
+
 	    		if (kind == lastReservedWord) {
 	    			// if we get here, we've not found a match, so break and return failure
 	    			break;
@@ -97,7 +97,7 @@ final class Token {
 	    	}
 	    	return Kind.IDENTIFIER;
 	    }
-	    
+
 	    private final static Kind firstReservedWord = ARRAY, lastReservedWord = WHILE;
 	}
 

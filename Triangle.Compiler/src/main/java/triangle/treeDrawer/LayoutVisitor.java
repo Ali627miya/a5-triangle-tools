@@ -37,6 +37,7 @@ import triangle.abstractSyntaxTrees.commands.CallCommand;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+import triangle.abstractSyntaxTrees.commands.RepeatCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
@@ -132,6 +133,11 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 	@Override
 	public DrawingTree visitEmptyCommand(EmptyCommand ast, Void obj) {
 		return layoutNullary("EmptyCom.");
+	}
+
+	@Override
+	public DrawingTree visitRepeatCommand(RepeatCommand ast, Void arg) {
+    	return null;
 	}
 
 	@Override

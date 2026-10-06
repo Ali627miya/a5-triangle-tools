@@ -38,6 +38,7 @@ import triangle.abstractSyntaxTrees.commands.CallCommand;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+import triangle.abstractSyntaxTrees.commands.RepeatCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
@@ -586,6 +587,17 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 	@Override
 	public TypeDenoter visitCharTypeDenoter(CharTypeDenoter ast, Void arg) {
 		return StdEnvironment.charType;
+	}
+
+	@Override
+	public Void visitRepeatCommand(RepeatCommand ast, Void arg) {
+    	ast.C.visit(this, arg); // Type check command body
+
+    	TypeDenoter eType = (TypeDenoter) ast.E.visit(this, arg); // Type check condition
+    	if (!eType.equals(StdEnvironment.booleanType)) {
+        	reporter.reportError("Boolean expression expected in repeat-until", "", ast.E.getPosition());
+    	}
+    	return null;
 	}
 
 	@Override
