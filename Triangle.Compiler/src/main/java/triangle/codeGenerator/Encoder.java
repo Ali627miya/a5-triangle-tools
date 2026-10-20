@@ -105,6 +105,7 @@ import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 import triangle.abstractSyntaxTrees.vnames.Vname;
 import triangle.codeGenerator.entities.AddressableEntity;
+import triangle.codeGenerator.entities.BarPrimitiveRoutine;
 import triangle.codeGenerator.entities.EqualityRoutine;
 import triangle.codeGenerator.entities.FetchableEntity;
 import triangle.codeGenerator.entities.Field;
@@ -272,12 +273,22 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 	}
 
 	@Override
-	public Integer visitUnaryExpression(UnaryExpression ast, Frame frame) {
-		var valSize = ast.type.visit(this);
-		ast.E.visit(this, frame);
-		ast.O.visit(this, frame.replace(valSize));
-		return valSize;
-	}
+    public Integer visitUnaryExpression(UnaryExpression ast, Frame frame) {
+        var valSize = ast.type.visit(this);
+
+        // 1. Visit operand (pushes argument onto stack)
+        ast.E.visit(this, frame);
+
+        // 2. If operator is "|", push constant integer 100 onto stack
+        if (ast.O.decl == StdEnvironment.barDecl) {
+            emitter.emit(OpCode.LOADL, 100);
+        }
+
+        // 3. Visit operator to emit primitive routine call (MULT)
+        ast.O.visit(this, frame.replace(valSize));
+
+        return valSize;
+    }
 
 	@Override
 	public Integer visitVnameExpression(VnameExpression ast, Frame frame) {
@@ -755,6 +766,9 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		elaborateStdPrimRoutine(StdEnvironment.puteolDecl, Primitive.PUTEOL);
 		elaborateStdEqRoutine(StdEnvironment.equalDecl, Primitive.EQ);
 		elaborateStdEqRoutine(StdEnvironment.unequalDecl, Primitive.NE);
+		elaborateStdPrimRoutine(StdEnvironment.barDecl, Primitive.MULT);
+		StdEnvironment.barDecl.entity = new BarPrimitiveRoutine();
+		elaborateStdPrimRoutine(StdEnvironment.andDecl, Primitive.AND);
 	}
 
 	boolean tableDetailsReqd;
