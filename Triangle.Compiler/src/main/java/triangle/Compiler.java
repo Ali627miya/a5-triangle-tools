@@ -18,6 +18,13 @@
 
 package triangle;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+
 import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
@@ -97,7 +104,7 @@ public class Compiler {
 			if (folding) {
 				theAST.visit(new ConstantFolder());
 			}
-			
+
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
@@ -121,33 +128,70 @@ public class Compiler {
 	 *             source filename.
 	 */
 	public static void main(String[] args) {
+        Options options = new Options();
+        
+        // Exact requirements from the practical brief
+        options.addOption("o", "output", true, "Set output object filename");
+        options.addOption(null, "showTree", false, "Display the abstract syntax tree");
+        options.addOption(null, "folding", false, "Enable constant folding optimisation");
+        options.addOption(null, "help", false, "Display help and usage information");
+        
+        // Optional short aliases for convenience
+        options.addOption("t", "tree", false, "Display the abstract syntax tree");
+        options.addOption("f", "fold", false, "Enable constant folding optimisation");
+        options.addOption("h", "help", false, "Display help and usage information");
 
-		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
-			System.exit(1);
-		}
-		
-		parseArgs(args);
+        CommandLineParser parser = new DefaultParser();
+        CommandLine cmd = null;
 
-		String sourceName = args[0];
-		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+        try {
+            cmd = parser.parse(options, args);
+        } catch (ParseException e) {
+            System.err.println("Error parsing arguments: " + e.getMessage());
+            printUsage(options);
+            System.exit(1);
+        }
 
-		if (!showTree) {
-			System.exit(compiledOK ? 0 : 1);
-		}
-	}
-	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
-		}
-	}
+        // Handle help flag
+        if (cmd.hasOption("help")) {
+            printUsage(options);
+            System.exit(0);
+        }
+
+        String[] remainingArgs = cmd.getArgs();
+        if (remainingArgs.length < 1) {
+            printUsage(options);
+            System.exit(1);
+        }
+
+        String sourceName = remainingArgs[0];
+
+        // Handle -o <filename> / --output
+        if (cmd.hasOption("o")) {
+            objectName = cmd.getOptionValue("o");
+        } else if (cmd.hasOption("output")) {
+            objectName = cmd.getOptionValue("output");
+        }
+
+        // Handle -showTree / -t
+        if (cmd.hasOption("showTree") || cmd.hasOption("t") || cmd.hasOption("tree")) {
+            showTree = true;
+        }
+
+        // Handle -folding / -f
+        if (cmd.hasOption("folding") || cmd.hasOption("f")) {
+            folding = true;
+        }
+
+        var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+
+        if (!showTree) {
+            System.exit(compiledOK ? 0 : 1);
+        }
+    }
+
+    private static void printUsage(Options options) {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp("java triangle.Compiler <filename> [options]", options);
+    }
 }

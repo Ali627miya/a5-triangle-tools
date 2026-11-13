@@ -10,22 +10,21 @@ repositories {
     mavenCentral()
 }
 
-
 dependencies {
-	implementation project(':Triangle.AbstractMachine')
-	testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+    implementation project(':Triangle.AbstractMachine')
+    implementation 'commons-cli:commons-cli:1.6.0' // <-- ADD THIS HERE
+    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
 }
 
 application {
-	mainClass = 'Triangle.Compiler'
+    mainClass = 'Triangle.Compiler'
 }
 
-// allow access to programs for unit tests
 sourceSets.test.resources.srcDir file("$rootDir/programs")
 
 test {
-    finalizedBy jacocoTestReport // report is always generated after tests run
+    finalizedBy jacocoTestReport 
 }
 jacocoTestReport {
-    dependsOn test // tests are required to run before generating the report
+    dependsOn test 
 }

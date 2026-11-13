@@ -1,4 +1,11 @@
-apply plugin: 'java'
+plugins {
+    id 'java'
+}
+
+// 1. ADD THIS BLOCK SO GRADLE KNOWS WHERE TO DOWNLOAD LIBRARIES
+repositories {
+    mavenCentral()
+}
 
 java {
     sourceCompatibility = 21
@@ -15,6 +22,10 @@ jar {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 
+    from subprojects.sourceSets.main.output
+}
 
-  from subprojects.sourceSets.main.output
+dependencies {
+    // Apache Commons CLI dependency
+    implementation 'commons-cli:commons-cli:1.6.0'
 }
